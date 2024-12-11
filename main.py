@@ -1,9 +1,9 @@
-from utils import load_panoptic_data
-from calib_camera_linear import get_cx_cy, get_R
-from calib_config import get_default_config
-from calib_extract_data import DataExtractor
-from calib_sampler import SpatialSampler
-from calib_camera_ransac import *
+from modules.utils import load_panoptic_data
+from modules.calib_camera_linear import get_cx_cy, get_R
+from modules.calib_config import get_default_config
+from modules.calib_extract_data import DataExtractor
+from modules.calib_sampler import SpatialSampler
+from modules.calib_camera_ransac import *
 
 if __name__ == "__main__":
 
