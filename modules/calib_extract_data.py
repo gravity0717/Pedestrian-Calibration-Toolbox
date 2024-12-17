@@ -96,6 +96,7 @@ class DataExtractor:
                     joints = self.get_head_to_feet_joints()
                 else:
                     joints = self.get_shoulder_to_hip_joints()
+                
                 keypoints = [
                     results[0].keypoints.xy[target_id][joint].cpu().numpy()
                     for joint in joints
