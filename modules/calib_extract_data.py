@@ -2,23 +2,21 @@ import numpy as np
 import cv2
 import json
 import os 
-import matplotlib.pyplot as plt 
-from collections import defaultdict
 from ultralytics import YOLO 
-import warnings
 
 class DataExtractor:
-    def __init__(self, line_length=0.5):
+    def __init__(self, line_length=0.5, set_whole_body=False):
         # YOLO
         self.yolo = YOLO("yolo11n-pose.pt")
         self.line_length = line_length 
+        self.set_whole_body = set_whole_body #True: whole body, False: upper body 
 
     def homography(self, keypoints): 
-        lsh, rsh, lh, rh = keypoints
-        pts1 = np.array([[rsh[0], rsh[1]],
-                         [lsh[0], lsh[1]],
-                         [lh[0], lh[1]], 
-                         [rh[0], rh[1]]]).reshape(-1, 1, 2).astype(np.float32)
+        left_up, right_up, left_down, right_down = keypoints
+        pts1 = np.array([[right_up[0], right_up[1]],
+                         [left_up[0], left_up[1]],
+                         [left_down[0], left_down[1]], 
+                         [right_down[0], right_down[1]]]).reshape(-1, 1, 2).astype(np.float32)
         pts2 = np.array([[1, 1], [3, 1], [3, 3], [1, 3]]).reshape(-1, 1, 2).astype(np.float32)
         H, _ = cv2.findHomography(pts2, pts1, cv2.RANSAC, 5.0)
         
@@ -29,6 +27,12 @@ class DataExtractor:
 
         return head_dot, bottom_dot
     
+    def get_head_to_feet_joints(self):
+        return [1, 2, 15, 16] # 1: Left Eye 2: Right Eye 15: Left Ankle 16: Right Ankle
+    
+    def get_shoulder_to_hip_joints(self):
+        return [5, 6, 11, 12] # 5: Left Shoulder 6: Right Shoulder 11: Left Hip 12: Right Hip
+    
     def extract(self, video_path):
         '''
            video_path: Video that you want to extract data from.
@@ -37,7 +41,6 @@ class DataExtractor:
                 - Extract 300 line segments and save head and bottom points into a JSON file.
                 - "line_length" should be the length of a pedestrian's upper body.
         '''
-        heads, bottoms = [], []
 
         # Check if the video file exists
         if not os.path.isfile(video_path):
@@ -55,8 +58,8 @@ class DataExtractor:
         cam_h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         
         t = 0
-        head_list = []
-        bottom_list = []
+        heads = []
+        bottoms = []
     
         while cap.isOpened():
             success, image = cap.read()
@@ -78,19 +81,25 @@ class DataExtractor:
             t += 1
 
             # Process every 4th frame
-            if t % 4 != 0:
+            if t % 3 != 0:
                 continue
 
-            if len(head_list) > 300:
+            if len(heads) > 1000:
                 break
 
             # Get keypoints
             try:
-                target_id = 0
+                track_ids = results[0].boxes.id.int().cpu().tolist()
+                target_id = int(len(track_ids)/2)
+                
+                if self.set_whole_body:
+                    joints = self.get_head_to_feet_joints()
+                else:
+                    joints = self.get_shoulder_to_hip_joints()
                 keypoints = [
                     results[0].keypoints.xy[target_id][joint].cpu().numpy()
-                    for joint in [5, 6, 11, 12]
-                ]  # 5: Left Shoulder, 6: Right Shoulder, 11: Left Hip, 12: Right Hip
+                    for joint in joints
+                ]  
             except (IndexError, AttributeError) as e:
                 print(f"Keypoint extraction failed: {e}")
                 continue
@@ -105,8 +114,8 @@ class DataExtractor:
             # Draw line only if within image bounds
             if (0 <= head[0] <= cam_w and 0 <= head[1] <= cam_h) and \
                (0 <= bottom[0] <= cam_w and 0 <= bottom[1] <= cam_h):
-                head_list.append(head.tolist())
-                bottom_list.append(bottom.tolist())
+                heads.append(head.tolist())
+                bottoms.append(bottom.tolist())
                 cv2.line(image, (int(head[0]), int(head[1])), (int(bottom[0]), int(bottom[1])), color=(255, 0, 0), thickness=4)
 
             # Display the video
@@ -117,9 +126,6 @@ class DataExtractor:
         # Release resources
         cap.release()
         cv2.destroyAllWindows()
-        
-        heads.append(head_list)
-        bottoms.append(bottom_list)
         
         # Save data to JSON
         output_path = "data/data.json"
@@ -134,4 +140,4 @@ class DataExtractor:
             }
             json.dump(result, f, indent=4)
 
-        print(f"Data saved to {output_path}")
+        print(f"============ Data saved to {output_path} with {len(heads)} line segments. =============")

@@ -5,7 +5,7 @@ import cv2 as cv
 import json 
 from tqdm import tqdm
 from scipy.optimize import minimize 
-from calib_camera_linear import get_R
+from .calib_camera_linear import get_R
 from collections import defaultdict
 from copy import deepcopy
 

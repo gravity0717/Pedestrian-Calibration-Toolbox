@@ -2,7 +2,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import least_squares
-from calib_camera_linear    import calib_camera_nlines, centerize_2d_pts, get_cx_cy, get_R
+from modules.calib_camera_linear import calib_camera_nlines, centerize_2d_pts
 
 def reproject_error_triangulate_k1(unknown, a, b, config, line_length, f, k1, theta, phi, h):
     '''Calculate reprojection errors of `a` and `b` with `unknown`'''

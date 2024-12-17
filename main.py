@@ -8,7 +8,7 @@ from modules.calib_camera_ransac import *
 if __name__ == "__main__":
 
     # 1. Extract data
-    data_extractor = DataExtractor(line_length= 0.5) 
+    data_extractor = DataExtractor(line_length= 0.7) 
     data_extractor.extract('data/input.avi')
 
     # 2. Load data 
@@ -27,7 +27,8 @@ if __name__ == "__main__":
     inlier_mask = calib_ransac[-2]
 
     # 5. Bundle adjustment 
-    calib_bundle = config["final_BA_fun"](a[inlier_mask], b[inlier_mask], cam_res, config, line_length, ls_options={'max_nfev': 1000})
+    cam_focal = calib_ransac[0]
+    calib_bundle = config["final_BA_fun"](a[inlier_mask], b[inlier_mask], img_size=cam_res, f = cam_focal, config = config, line_length = line_length)
     f, dist_coeff, theta, phi, h, xy = calib_bundle
 
     # Save result 
@@ -44,11 +45,11 @@ if __name__ == "__main__":
             f.write("\n")
         f.write("\nTranslationVectors\n")
         for i in range(3):
-            f.write(str(int(T[i]))+" ")
+            f.write(str(T[i])+" ")
         f.write("\n\nIntrinsicMatrix\n")
         for i in range(3):
             for j in range(3):
-                f.write(str(int(K[i,j]))+" ")
+                f.write(str(K[i,j])+" ")
             f.write("\n")
 
     with open('data/dist_coef.txt', 'w') as f:
