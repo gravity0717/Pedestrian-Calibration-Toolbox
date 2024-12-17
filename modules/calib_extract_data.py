@@ -5,7 +5,7 @@ import os
 from ultralytics import YOLO 
 
 class DataExtractor:
-    def __init__(self, line_length=0.5, set_whole_body=False):
+    def __init__(self, line_length=0.7, set_whole_body=False):
         # YOLO
         self.yolo = YOLO("yolo11n-pose.pt")
         self.line_length = line_length 
@@ -80,10 +80,6 @@ class DataExtractor:
 
             t += 1
 
-            # Process every 4th frame
-            if t % 3 != 0:
-                continue
-
             if len(heads) > 1000:
                 break
 
@@ -101,6 +97,7 @@ class DataExtractor:
                     results[0].keypoints.xy[target_id][joint].cpu().numpy()
                     for joint in joints
                 ]  
+                
             except (IndexError, AttributeError) as e:
                 print(f"Keypoint extraction failed: {e}")
                 continue
@@ -118,6 +115,7 @@ class DataExtractor:
                 heads.append(head.tolist())
                 bottoms.append(bottom.tolist())
                 cv2.line(image, (int(head[0]), int(head[1])), (int(bottom[0]), int(bottom[1])), color=(255, 0, 0), thickness=4)
+            else: continue
 
             # Display the video
             cv2.imshow("Video", image)

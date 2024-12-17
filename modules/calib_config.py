@@ -6,7 +6,7 @@ def get_default_config():
         'ransac_options': {'n_sample': 4, 
                             'min_iter': 20, 
                             'max_iter': 500, 
-                            'threshold': 30, 
+                            'threshold': 10, 
                             'heuristic': True, 
                             'regularization': 1, 
                             'msac': True},

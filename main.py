@@ -4,12 +4,14 @@ from modules.calib_config import get_default_config
 from modules.calib_extract_data import DataExtractor
 from modules.calib_sampler import SpatialSampler
 from modules.calib_camera_ransac import *
+import cv2 
 
 if __name__ == "__main__":
 
     # 1. Extract data
-    data_extractor = DataExtractor(line_length= 0.7) 
+    data_extractor = DataExtractor(line_length=1, set_whole_body=False) 
     data_extractor.extract('data/input.avi')
+    # data_extractor.extract('data/PETS09-S2L1.avi')
 
     # 2. Load data 
     a, b, cam_res, line_length = load_panoptic_data('data/data.json')
@@ -20,6 +22,15 @@ if __name__ == "__main__":
     spatial_sampler = SpatialSampler(cam_res, (50, 50))
     filter_index = spatial_sampler.run_sample(a)
     a, b = a[filter_index], b[filter_index]
+
+    # Draw line segments 
+    # img_bgr = cv2.imread('assets/MOT15_PETS09S2L1.jpg')
+    # for ai, bi in zip(a, b):
+    #     pt_a = tuple(map(int, ai))
+    #     pt_b = tuple(map(int, bi))
+    #     cv2.line(img_bgr, pt_a, pt_b, (255,0,0),2,-1)
+    # img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+    # cv2.imwrite("assets/line_segments.png", img_rgb)
 
     # 4. MSAC
     config = get_default_config()
@@ -45,7 +56,7 @@ if __name__ == "__main__":
             f.write("\n")
         f.write("\nTranslationVectors\n")
         for i in range(3):
-            f.write(str(T[i])+" ")
+            f.write(str(int(T[i])*1000)+" ")
         f.write("\n\nIntrinsicMatrix\n")
         for i in range(3):
             for j in range(3):
