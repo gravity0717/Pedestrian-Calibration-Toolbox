@@ -130,7 +130,10 @@ Contains lens distortion coefficients:
       \end{aligned}
       $$
 ---
-
+### Improvements 
+![a](/assets/fig_before.png)
+![b](/assets/fig_after.png)
+---
 ## Notes
 - **YOLO Model:** The `yolo11n-pose.pt` model is required and can be downloaded from [Ultralytics YOLO](https://github.com/ultralytics/ultralytics).
 - **Input Video:** Ensure your input video is available at `data/input.avi`.
