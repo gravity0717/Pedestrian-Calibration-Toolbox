@@ -41,13 +41,15 @@ pip install numpy opencv-python scipy matplotlib ultralytics lap
   ```
 
 ---
+![Pipeline of Camera calibratiion using pedestrian](./assets/fig_overall_procedure.png)
+
 
 ### **2. main.py**
 - **Purpose:** Processes the extracted data to compute the camera's intrinsic and extrinsic parameters, and saves the calibration results.
 - **Workflow:**
   1. **Data Extraction:** Use `calib_extract_data.py` to generate JSON data.
   2. **Data Loading:** Load the extracted JSON data for calibration.
-  3. **Data Sampling:** Use `SpatialSampler` to refine the dataset.
+  3. **Data Sampling:** Use `SpatialSampler` to refine the dataset. This sampler ensures line segments occupy one portion of grid.
   4. **Initial Calibration (MSAC):** Estimate camera parameters using the MSAC algorithm (a variant of RANSAC).
   5. **Optimization (Bundle Adjustment):** Refine the results for higher accuracy.
   6. **Save Results:** Save the camera’s rotation matrix, translation vector, intrinsic matrix, and distortion coefficients to text files.
@@ -64,7 +66,7 @@ The output files generated during the execution are structured as follows:
 
 ### **1. data/data.json**
 Contains extracted pedestrian data:
-- `a`: Bottom (foot) positions.
+- `a`: Bottom positions.
 - `b`: Head positions.
 - `l`: Pedestrian upper body length.
 - `cam_w`: Camera resolution (width).
@@ -100,6 +102,33 @@ Contains lens distortion coefficients:
    ```
    After execution, the calibration results will be saved in `data/calibration.txt` and `data/dist_coef.txt`.
 
+
+### **Calibration results** 
+3. `calibration.txt` and `dist_coef.txt`
+    Camera calibration results follows geometric structure and notations that below.
+
+    (1) Gemoetrical overview
+![Geometric overview](./assets/fig_geometrical_overview.png)
+    
+    (2) Equations 
+      $$
+      \begin{aligned}
+        \mathrm{K} &=\begin{bmatrix}
+                          f & 0 &  cx \\
+                          0 &  f & cy \\
+                          0 & 0 & 1 
+                    \end{bmatrix} \\
+
+        \mathrm{R} &= \mathrm{R}_z(\phi) \mathrm{R}_x(\theta) \\
+                    &= \begin{bmatrix}
+                          \cos \phi & -\cos \theta \sin \phi &  \sin \theta \sin \phi \\
+                          \sin \phi &  \cos \theta \cos \phi & -\sin \theta \cos \phi \\
+                          0 & \sin \theta & \cos \theta \end{bmatrix} \\
+                    &= \begin{bmatrix} \mathbf{r_1} & \mathbf{r_2} & \mathbf{r_3} \end{bmatrix} \\
+
+        \mathbf{t} &= -\mathrm{R} \begin{bmatrix} 0 \\ 0 \\ H_c \end{bmatrix} = -H_c \mathbf{r}_3 
+      \end{aligned}
+      $$
 ---
 
 ## Notes

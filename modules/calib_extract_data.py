@@ -127,7 +127,8 @@ class DataExtractor:
         cv2.destroyAllWindows()
         
         # Save data to JSON
-        output_path = "data/data.json"
+        seq = video_path[:-4]
+        output_path = f"data/data_{seq}.json"
         os.makedirs(os.path.dirname(output_path), exist_ok=True)  # Ensure the directory exists
         with open(output_path, 'w') as f:
             result = {
