@@ -7,14 +7,15 @@ from modules.calib_camera_ransac import *
 import cv2 
 
 if __name__ == "__main__":
-    for seq in ["MOT17_02","MOT17_04","MOT17_05","MOT17_09","MOT17_10","MOT17_11","MOT17_13"]:
+    config = get_default_config()
 
+    for seq in ["MOT17-02","MOT17-04","MOT17-05","MOT17-09","MOT17-10","MOT17-11","MOT17-13"]:
         # 1. Extract data
-        data_extractor = DataExtractor(line_length=0.5, set_whole_body=False) 
-        data_extractor.extract(f'data/{seq}.avi')
+        data_extractor = DataExtractor(line_length=config["line_length"], set_whole_body=False, set_multi_person=True) 
+        data_extractor.extract(f'data/{seq}.avi', n_lines=["n_lines"])
 
         # 2. Load data 
-        a, b, cam_res, line_length = load_panoptic_data(f'data/data_{seq}.json')
+        a, b, cam_res, line_length = load_panoptic_data(f'data/{seq}.json')
         a = a.reshape(-1, 2)
         b = b.reshape(-1, 2)
 
@@ -24,7 +25,6 @@ if __name__ == "__main__":
         a, b = a[filter_index], b[filter_index]
 
         # 4. MSAC
-        config = get_default_config()
         calib_ransac = calib_camera_ransac(a, b, cam_res, line_length, config=config)
         inlier_mask = calib_ransac[-2]
 
@@ -37,9 +37,16 @@ if __name__ == "__main__":
         cx, cy = get_cx_cy(cam_res)
         K = np.array([[f, 0, cx], [0, f, cy], [0, 0, 1]])
         R = get_R(theta, phi)
+
+        # R_tra: coordinate alignment fit to UCMC systems
+        R_tra = np.array([[0, 1, 0],
+                     [1, 0, 0],
+                     [0, 0, 1]])
+        R = R_tra @ R 
+
         T = -R @ np.array([0, 0, h])
 
-        with open(f'data/calibration_{seq}.txt', 'w') as f:
+        with open(f'data/{seq}-SDP.txt', 'w') as f:
             f.write("RotationMatrices\n")
             for i in range(3):
                 for j in range(3):
@@ -53,9 +60,12 @@ if __name__ == "__main__":
                 for j in range(3):
                     f.write(str(K[i,j])+" ")
                 f.write("\n")
-
-        with open(f'data/dist_coef_{seq}.txt', 'w') as f:
             f.write("Distortion\n")
             f.write(str(dist_coeff[0])+" ")
             for i in range(3):
                 f.write(str(0.0)+" ")
+        # with open(f'data/dist_coef_{seq}.txt', 'w') as f:
+            # f.write("Distortion\n")
+            # f.write(str(dist_coeff[0])+" ")
+            # for i in range(3):
+            #     f.write(str(0.0)+" ")

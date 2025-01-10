@@ -41,12 +41,12 @@ class DataExtractor:
     def get_shoulder_to_hip_joints(self):
         return [5, 6, 11, 12] # 5: Left Shoulder 6: Right Shoulder 11: Left Hip 12: Right Hip
     
-    def extract(self, video_path):
+    def extract(self, video_path, n_lines=500):
         '''
            video_path: Video that you want to extract data from.
            
            Description:
-                - Extract 300 line segments and save head and bottom points into a JSON file.
+                - Extract n line segments and save head and bottom points into a JSON file.
                 - "line_length" should be the length of a pedestrian's upper body.
         '''
 
@@ -70,6 +70,7 @@ class DataExtractor:
     
         while cap.isOpened():
             success, image = cap.read()
+            t += 1
 
             if not success or image is None:
                 print("Failed to read frame or end of video reached.")
@@ -85,9 +86,8 @@ class DataExtractor:
             except Exception as e:
                 print(f"YOLO tracking failed: {e}")
                 break
-            t += 1
 
-            if len(head_final) > 2000:
+            if len(head_final) > n_lines:
                 break
 
             # Get keypoints

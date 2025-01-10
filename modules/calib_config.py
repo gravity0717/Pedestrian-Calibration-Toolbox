@@ -3,9 +3,11 @@ from modules.calib_camera_nonlinear import *
 
 def get_default_config():
     config = {
+        'line_length': 0.5, # half-body 
+        'n_linse':500, 
         'ransac_options': {'n_sample': 4, 
                             'min_iter': 20, 
-                            'max_iter': 500, 
+                            'max_iter': 100, 
                             'threshold': 10, 
                             'heuristic': True, 
                             'regularization': 1, 
@@ -15,5 +17,11 @@ def get_default_config():
         "bundle_fun": calib_camera_ba_k1, # calib_camera_ba_k1 or calib_camera_ba_k1_k2
         "final_BA_fun": calib_camera_ba_k1_f_static# calib_camera_ba_k1_f_static or calib_camera_ba_k1_k2_f_static
     }
+    return config
+
+def get_whole_body_config():
+    config = get_default_config()
+    line_config = {'line_length': 1.8, 'n_lines':100}
+    config.update(line_config)
     return config
 
