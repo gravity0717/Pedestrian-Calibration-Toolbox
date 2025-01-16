@@ -7,7 +7,8 @@ from modules.calib_camera_ransac import *
 
 if __name__ == "__main__":
     config = get_default_config()
-
+    flag_transform = False
+    
     for seq in ['input']:
         # 1. Extract data
         data_extractor = DataExtractor(line_length=config["line_length"], set_whole_body=False, set_multi_person=True) 
@@ -37,15 +38,15 @@ if __name__ == "__main__":
         K = np.array([[f, 0, cx], [0, f, cy], [0, 0, 1]])
         R = get_R(theta, phi)
 
-        # R_tra: coordinate alignment fit to UCMC systems
-        R_tra = np.array([[0, 1, 0],
-                     [1, 0, 0],
-                     [0, 0, 1]])
-        R = R_tra @ R 
+        # Options: Coordinate alignment fit to UCMC systems if you want 
+        if flag_transform:
+            R_tra = np.array([[0, 1, 0],
+                        [1, 0, 0],
+                        [0, 0, 1]])
+            R = R_tra @ R 
+            T = -R @ np.array([0, 0, h])
 
-        T = -R @ np.array([0, 0, h])
-
-        with open(f'data/{seq}.txt', 'w') as f:
+        with open(f'data/calibration.txt', 'w') as f:
             f.write("RotationMatrices\n")
             for i in range(3):
                 for j in range(3):
@@ -63,7 +64,7 @@ if __name__ == "__main__":
             f.write(str(dist_coeff[0])+" ")
             for i in range(3):
                 f.write(str(0.0)+" ")
-        with open(f'data/dist_coef_{seq}.txt', 'w') as f:
+        with open(f'data/dist_coef.txt', 'w') as f:
             f.write("Distortion\n")
             f.write(str(dist_coeff[0])+" ")
             for i in range(3):

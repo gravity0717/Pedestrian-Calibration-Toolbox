@@ -4,7 +4,7 @@ The **Pedestrian-based Camera Calibration Toolbox** is a Python-based tool desig
 
 ---
 
-## Installation and Dependencies
+## Prerequisite
 
 To use this project, the following libraries need to be installed.
 
@@ -22,29 +22,19 @@ Run the following command to install the necessary libraries:
 pip install numpy opencv-python scipy matplotlib ultralytics lap
 ```
 
+### **Make Data Folder**
+Make data folder and put your input video `input.avi`.
+```bash 
+mkdir data 
+```
+
 ---
-
-## Key Files and Descriptions
-
-### **1. calib_extract_data.py**
-- **Purpose:** Extracts 300 line segments from a given video, based on the pedestrian’s upper body length, and saves the extracted data in a JSON file.
-- **Key Features:**
-  - Tracks pedestrian joints using YOLO.
-  - Computes line endpoints (head and bottom) using homography.
-  - Saves the extracted data to `data/data.json`.
-- **Usage Example:**
-  ```python
-  from calib_extract_data import DataExtractor
-
-  data_extractor = DataExtractor(line_length=0.5)
-  data_extractor.extract('data/input.avi')  # Replace 'input.avi' with your video
-  ```
 
 ---
 ![Pipeline of Camera calibratiion using pedestrian](./assets/fig_overall_procedure.png)
 
 
-### **2. main.py**
+### **main.py**
 - **Purpose:** Processes the extracted data to compute the camera's intrinsic and extrinsic parameters, and saves the calibration results.
 - **Workflow:**
   1. **Data Extraction:** Use `calib_extract_data.py` to generate JSON data.
@@ -86,17 +76,8 @@ Contains lens distortion coefficients:
 
 ## Example Workflow
 
-### **Extract Data from Video**
-1. Run `calib_extract_data.py`:
-   ```python
-   from calib_extract_data import DataExtractor
-
-   extractor = DataExtractor(line_length=0.5)
-   extractor.extract('data/input.avi')
-   ```
-
 ### **Perform Calibration**
-2. Run `main.py`:
+1. Run `main.py`:
    ```bash
    python main.py
    ```
@@ -104,7 +85,7 @@ Contains lens distortion coefficients:
 
 
 ### **Calibration results** 
-3. `calibration.txt` and `dist_coef.txt`
+2. `calibration.txt` and `dist_coef.txt`
     Camera calibration results follows geometric structure and notations that below.
 
     (1) Gemoetrical overview
