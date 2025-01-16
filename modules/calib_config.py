@@ -4,7 +4,7 @@ from modules.calib_camera_nonlinear import *
 def get_default_config():
     config = {
         'line_length': 0.5, # half-body 
-        'n_linse':500, 
+        'n_lines':500, 
         'ransac_options': {'n_sample': 4, 
                             'min_iter': 20, 
                             'max_iter': 100, 

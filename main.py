@@ -4,15 +4,14 @@ from modules.calib_config import get_default_config
 from modules.calib_extract_data import DataExtractor
 from modules.calib_sampler import SpatialSampler
 from modules.calib_camera_ransac import *
-import cv2 
 
 if __name__ == "__main__":
     config = get_default_config()
 
-    for seq in ["MOT17-02","MOT17-04","MOT17-05","MOT17-09","MOT17-10","MOT17-11","MOT17-13"]:
+    for seq in ['input']:
         # 1. Extract data
         data_extractor = DataExtractor(line_length=config["line_length"], set_whole_body=False, set_multi_person=True) 
-        data_extractor.extract(f'data/{seq}.avi', n_lines=["n_lines"])
+        data_extractor.extract(f'data/{seq}.avi', n_lines=config["n_lines"])
 
         # 2. Load data 
         a, b, cam_res, line_length = load_panoptic_data(f'data/{seq}.json')
@@ -46,7 +45,7 @@ if __name__ == "__main__":
 
         T = -R @ np.array([0, 0, h])
 
-        with open(f'data/{seq}-SDP.txt', 'w') as f:
+        with open(f'data/{seq}.txt', 'w') as f:
             f.write("RotationMatrices\n")
             for i in range(3):
                 for j in range(3):
@@ -64,8 +63,8 @@ if __name__ == "__main__":
             f.write(str(dist_coeff[0])+" ")
             for i in range(3):
                 f.write(str(0.0)+" ")
-        # with open(f'data/dist_coef_{seq}.txt', 'w') as f:
-            # f.write("Distortion\n")
-            # f.write(str(dist_coeff[0])+" ")
-            # for i in range(3):
-            #     f.write(str(0.0)+" ")
+        with open(f'data/dist_coef_{seq}.txt', 'w') as f:
+            f.write("Distortion\n")
+            f.write(str(dist_coeff[0])+" ")
+            for i in range(3):
+                f.write(str(0.0)+" ")

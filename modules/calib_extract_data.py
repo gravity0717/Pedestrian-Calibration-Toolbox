@@ -86,7 +86,7 @@ class DataExtractor:
             except Exception as e:
                 print(f"YOLO tracking failed: {e}")
                 break
-
+            
             if len(head_final) > n_lines:
                 break
 
