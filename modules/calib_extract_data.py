@@ -71,7 +71,8 @@ class DataExtractor:
         while cap.isOpened():
             success, image = cap.read()
             t += 1
-
+            if(t%4!=0):
+                continue
             if not success or image is None:
                 print("Failed to read frame or end of video reached.")
                 break
@@ -94,7 +95,8 @@ class DataExtractor:
             try:
                 track_ids = results[0].boxes.id.int().cpu().tolist()
                 if not self.set_multi_person: 
-                    track_ids = [int(len(track_ids)/2)]
+                    # track_ids = [int(len(track_ids)/2)]
+                    track_ids = [int(track_ids[-1])]
                 
                 if self.set_whole_body:
                     joints = self.get_head_to_feet_joints()

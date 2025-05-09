@@ -7,11 +7,13 @@ from modules.calib_camera_ransac import *
 
 if __name__ == "__main__":
     config = get_default_config()
-    flag_transform = False
+    flag_transform = True
     
-    for seq in ['input']:
+    for seq in ["MOT17-02", "MOT17-04", "MOT17-05", "MOT17-09", "MOT17-10", "MOT17-11", "MOT17-13"]:
+    # for seq in ["MOT17-10"]:
+
         # 1. Extract data
-        data_extractor = DataExtractor(line_length=config["line_length"], set_whole_body=False, set_multi_person=True) 
+        data_extractor = DataExtractor(line_length=config["line_length"], set_whole_body=False, set_multi_person=False) 
         data_extractor.extract(f'data/{seq}.avi', n_lines=config["n_lines"])
 
         # 2. Load data 
@@ -30,9 +32,13 @@ if __name__ == "__main__":
 
         # 5. Bundle adjustment 
         cam_focal = calib_ransac[0]
-        calib_bundle = config["final_BA_fun"](a[inlier_mask], b[inlier_mask], img_size=cam_res, f = cam_focal, config = config, line_length = line_length)
+        calib_bundle = config["final_BA_fun"](a[inlier_mask], b[inlier_mask], img_size=cam_res, config = config, line_length = line_length)
         f, dist_coeff, theta, phi, h, xy = calib_bundle
 
+
+
+        # Rescaling for half-body 
+        h *=3 
         # Save result 
         cx, cy = get_cx_cy(cam_res)
         K = np.array([[f, 0, cx], [0, f, cy], [0, 0, 1]])
@@ -46,7 +52,7 @@ if __name__ == "__main__":
             R = R_tra @ R 
             T = -R @ np.array([0, 0, h])
 
-        with open(f'data/calibration.txt', 'w') as f:
+        with open(f'data/{seq}-SDP.txt', 'w') as f:
             f.write("RotationMatrices\n")
             for i in range(3):
                 for j in range(3):
